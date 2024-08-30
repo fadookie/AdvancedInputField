@@ -343,10 +343,12 @@ public class NativeKeyboard extends Fragment implements TextWatcher, TextView.On
 
     DummyView getViewForAutofill(AutofillType type)
     {
+        Log.w(TAG, "@@@ getViewForAutofill autofillType:" + type);
         DummyView autofillView = null;
         if(autofillViews.containsKey(type))
         {
             autofillView = autofillViews.get(type);
+            Log.w(TAG, "@@@ getViewForAutofill found existing view:" + autofillView);
         }
 
         if(autofillView == null)
@@ -367,7 +369,8 @@ public class NativeKeyboard extends Fragment implements TextWatcher, TextView.On
                 autofillView.autofillType = type;
                 switch (type)
                 {
-                    case USERNAME: autofillView.setAutofillHints(HintConstants.AUTOFILL_HINT_USERNAME);
+                    // TODO: maybe determine email hint from field settings in Unity? Hardcoding for now.
+                    case USERNAME: autofillView.setAutofillHints(HintConstants.AUTOFILL_HINT_EMAIL_ADDRESS, HintConstants.AUTOFILL_HINT_USERNAME);
                         break;
                     case PASSWORD: autofillView.setAutofillHints(HintConstants.AUTOFILL_HINT_PASSWORD);
                         break;
@@ -412,6 +415,8 @@ public class NativeKeyboard extends Fragment implements TextWatcher, TextView.On
             viewY -= height;
 
             autofillViews.put(type, autofillView);
+
+            Log.w(TAG, "@@@ getViewForAutofill make new view:" + autofillView);
         }
 
         return  autofillView;
@@ -822,6 +827,7 @@ public class NativeKeyboard extends Fragment implements TextWatcher, TextView.On
 
     private void determineCurrentView(AutofillType autofillType)
     {
+        Log.w(TAG, "@@@ determineCurrentView autofillType:" + autofillType);
         if (Build.VERSION.SDK_INT >= 26)
         {
             DummyView nextView = null;
@@ -839,6 +845,7 @@ public class NativeKeyboard extends Fragment implements TextWatcher, TextView.On
                 state = KeyboardState.PENDING_RELOAD;
                 inputMethodManager.hideSoftInputFromWindow(currentView.getWindowToken(), 0);
                 currentView = nextView;
+                Log.w(TAG, "@@@ determineCurrentView currentView update:" + DebugViews.logViewHierarchy(currentView));
             }
         }
     }
@@ -1491,6 +1498,7 @@ public class NativeKeyboard extends Fragment implements TextWatcher, TextView.On
 
     public static void saveCredentials()
     {
+        Log.w(TAG, "@@@ saveCredentials called");
         try
         {
             Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -1502,6 +1510,7 @@ public class NativeKeyboard extends Fragment implements TextWatcher, TextView.On
                     if (Build.VERSION.SDK_INT >= 26)
                     {
                         AutofillManager autofillManager = instance.getActivity().getSystemService(AutofillManager.class);
+                        Log.w(TAG, "@@@ saveCredentials commit");
                         autofillManager.commit();
                     }
                 }
